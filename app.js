@@ -68,6 +68,7 @@ Ext.application({
                             title: 'Trip Details',
                             instructions: 'Please give us some details about your trip',
                             //height: 285,
+
                             items: [
 						
                            {
@@ -160,7 +161,8 @@ Ext.application({
 									useDefaultXhrHeader: false,
 									params: geoJson,
 									callback: function(options, success, response) {
-									//console.log(response.responseText);}
+									//console.log(response.responseText);
+									}
 									});//end Request
 							
 /**from 		http://alvinalexander.com/javascript/sencha-touch-extjs-json-encode-post-examples						
