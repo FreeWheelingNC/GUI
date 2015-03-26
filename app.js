@@ -56,6 +56,7 @@ Ext.application({
 				"space" : null,
 				"speed" : null
 							}
+							
 		};
 		var audio = Ext.create('Ext.Audio',
 			{hidden: 'true',
@@ -159,8 +160,11 @@ Ext.application({
 									geoJson.properties[property]=tripFormValues[property];
 									}
 								}
-								geoJson=Ext.JSON.encode(geoJson);
-
+								var newJson = {"type" : "Feature",
+									"properties" : geoJson.properties,
+									"geometry" : {"type":"LineString", "coordinates": geoJson.coordinates}};
+								newJson=Ext.JSON.encode(newJson);
+								console.log(newJson);
 								Ext.Ajax.request({
 									url: 'http://freewheelingdashboard.herokuapp.com/routes/create',
 									withCredentials: true,
@@ -216,7 +220,7 @@ Ext.application({
 				locationupdate: function(geo){
 					var gts = geo.getTimestamp();
 					if(!geoJson.properties.timeBegin) geoJson.properties.timeBegin=gts;
-					geoJson.coordinates.push([geo.getLatitude(),geo.getLongitude()]);
+					geoJson.coordinates.push([geo.getLongitude(),geo.getLatitude()]);
 					geoJson.properties.timeEnd = gts;
 					},//end locationupdate
 					locationerror: function(geo, bTimeout, bPermissionDenied, bLocationUnavailable, message) {
