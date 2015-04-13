@@ -1,0 +1,133 @@
+diff --git a/app.js b/app.js
+index 56853d9..e6db6bc 100644
+--- a/app.js
++++ b/app.js
+@@ -47,7 +47,14 @@ Ext.application({
+ 			"coordinates" : [],
+ 			"properties" : {
+ 				"timeBegin" : 0,
+-				"timeEnd" : 0	
++				"timeEnd" : 0  ,
++				"purpose" : null,
++				"debris" : null,
++				"bikeRacks" : null,
++				"pavement" : null,
++				"lighting" : null,
++				"space" : null,
++				"speed" : null
+ 							}
+ 		};
+ 		var audio = Ext.create('Ext.Audio',
+@@ -145,24 +152,30 @@ Ext.application({
+                             scope: this,
+                             //formBind: true,
+                             handler: function(btn) {
+-								//console.log('Data send');
++
+ 								var tripFormValues = tripForm.getValues();
+ 								for (property in tripFormValues){
+ 								if(tripFormValues.hasOwnProperty(property)){
+ 									geoJson.properties[property]=tripFormValues[property];
+-									//console.log(property + ":" + tripFormValues[property]);
+ 									}
+ 								}
+-								//console.log(geoJson);
+ 								geoJson=Ext.JSON.encode(geoJson);
++
+ 								Ext.Ajax.request({
+ 									url: 'http://freewheelingdashboard.herokuapp.com/routes/create',
+ 									withCredentials: true,
+-									useDefaultXhrHeader: false,
++									headers: {"Content-Type": "application/json"},
+ 									params: geoJson,
+-									callback: function(options, success, response) {
+-									//console.log(response.responseText);
++									success: function(response) {
++									Ext.Msg.alert('Sent', 'Trip sent. Thanks!', Ext.emptyFn);
++									},
++
++									failure: function(response) {
++									console.log("Curses, something terrible happened");
+ 									}
++									//callback: function(options, success, response) {
++									//Ext.Msg.alert('Sent', 'Trip sent. Thanks!', Ext.emptyFn);
++									//}
+ 									});//end Request
+ 							
+ /**from 		http://alvinalexander.com/javascript/sencha-touch-extjs-json-encode-post-examples						
+@@ -180,16 +193,17 @@ Ext.application({
+           params: Ext.util.JSON.encode(form.getValues()),
+           waitTitle:'Connecting', 
+           waitMsg:'Creating...',
+-          success:function(data){             
++          success:function(data){        
++          Ext.Msg.alert('Sent', 'Trip sent. Thanks!', Ext.emptyFn);     
+           },
+           failure:function(form, result){
+           }
+       });
+   }
+ }**/
+-								//console.log(tripFormValues);
++								
+ 								//tripFormValues=Ext.JSON.encode(tripFormValues);
+-								//console.log(tripFormValues);
++								
+ 								//this.up('formpanel').submit();
+                             }
+                         }
+@@ -204,11 +218,6 @@ Ext.application({
+ 					if(!geoJson.properties.timeBegin) geoJson.properties.timeBegin=gts;
+ 					geoJson.coordinates.push([geo.getLatitude(),geo.getLongitude()]);
+ 					geoJson.properties.timeEnd = gts;
+-					
+-					//console.log('New latitude: ' + geo.getLatitude());
+-					//console.log('New longitude: ' + geo.getLongitude());
+-					
+-					//console.log('Taken at: ' + gts.toString());
+ 					},//end locationupdate
+ 					locationerror: function(geo, bTimeout, bPermissionDenied, bLocationUnavailable, message) {
+ 						if(bTimeout){
+@@ -245,7 +254,6 @@ Ext.create("Ext.tab.Panel", {
+                         {
+                             xtype: 'fieldset',
+                             title: 'Start your Ride',
+-                            //height: 285,
+                             instructions: ''
+                             ,
+                             items: [
+@@ -257,29 +265,23 @@ Ext.create("Ext.tab.Panel", {
+ 										change: function(field, newValue, oldValue) {
+ 											
+ 											if (newValue){
+-												//console.log("GPS Enabled");
+-												
+ 												audio.setLoop(true);
+ 												audio.play();										
+-												////geo.setAutoUpdate(true);
++												geo.setAutoUpdate(true);
+ 											} else {
+ 												var confirmBox = Ext.Msg.confirm("Confirm", "End your Trip?", function(buttonId){
+ 													if (buttonId === 'yes'){
+-														//console.log("GPS Disabled");
++
+ 														audio.setLoop(false);
+ 														audio.stop();
+-														//geo.setAutoUpdate(false);
++														geo.setAutoUpdate(false);
+ 														
+ 														Ext.Viewport.down('tabpanel').setActiveItem(2);
+ 													} else {Ext.ComponentQuery.query('togglefield')[0].toggle();}
+ 													
+-													});
+-												
+-												
+-												//console.log(geo.getAutoUpdate());
+-											
++													});//end TripEnd Confirmation						
+ 											}//end if
+-											//console.log('Value of this toggle has changed:', (newValue) ? 'ON' : 'OFF');
++
+ 										}
+ 									}
+                                     

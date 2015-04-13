@@ -1,22 +1,14 @@
 /*
-*    FreeWheelingNC Mobile App
-*    Copyright (C) 2015  John Weis
-*    This program is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU Affero General Public License as
-*    published by the Free Software Foundation, either version 3 of the
-*    License, or (at your option) any later version.
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU Affero General Public License for more details.
-*    You should have received a copy of the GNU Affero General Public License
-*    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-* 
-* 
-* 
-* 
-*/
+    This file is generated and updated by Sencha Cmd. You can edit this file as
+    needed for your application, but these edits will have to be merged by
+    Sencha Cmd when it performs code generation tasks such as generating new
+    models, controllers or views and when running "sencha app upgrade".
 
+    Ideally changes to this file would be limited and most work would be done
+    in other places (such as Controllers). If Sencha Cmd cannot merge your
+    changes and its generated code, it will produce a "merge conflict" that you
+    will need to resolve manually.
+*/
 
 Ext.application({
     name: 'FreeWheelingNC',
@@ -55,16 +47,8 @@ Ext.application({
 			"coordinates" : [],
 			"properties" : {
 				"timeBegin" : 0,
-				"timeEnd" : 0  ,
-				"purpose" : null,
-				"debris" : null,
-				"bikeRacks" : null,
-				"pavement" : null,
-				"lighting" : null,
-				"space" : null,
-				"speed" : null
+				"timeEnd" : 0	
 							}
-							
 		};
 		var audio = Ext.create('Ext.Audio',
 			{hidden: 'true',
@@ -161,33 +145,24 @@ Ext.application({
                             scope: this,
                             //formBind: true,
                             handler: function(btn) {
-
+								//console.log('Data send');
 								var tripFormValues = tripForm.getValues();
 								for (property in tripFormValues){
 								if(tripFormValues.hasOwnProperty(property)){
 									geoJson.properties[property]=tripFormValues[property];
+									//console.log(property + ":" + tripFormValues[property]);
 									}
 								}
-								var newJson = {"type" : "Feature",
-									"properties" : geoJson.properties,
-									"geometry" : {"type":"LineString", "coordinates": geoJson.coordinates}};
-								newJson=Ext.JSON.encode(newJson);
-								console.log(newJson);
+								//console.log(geoJson);
+								geoJson=Ext.JSON.encode(geoJson);
 								Ext.Ajax.request({
 									url: 'http://freewheelingdashboard.herokuapp.com/routes/create',
-									//withCredentials: true,
-									headers: {"Content-Type": "application/json"},
+									withCredentials: true,
+									useDefaultXhrHeader: false,
 									params: geoJson,
-									success: function(response) {
-									Ext.Msg.alert('Sent', 'Trip sent. Thanks!', Ext.emptyFn);
-									},
-
-									failure: function(response) {
-									console.log("Curses, something terrible happened");
+									callback: function(options, success, response) {
+									//console.log(response.responseText);
 									}
-									//callback: function(options, success, response) {
-									//Ext.Msg.alert('Sent', 'Trip sent. Thanks!', Ext.emptyFn);
-									//}
 									});//end Request
 							
 /**from 		http://alvinalexander.com/javascript/sencha-touch-extjs-json-encode-post-examples						
@@ -205,17 +180,16 @@ Ext.application({
           params: Ext.util.JSON.encode(form.getValues()),
           waitTitle:'Connecting', 
           waitMsg:'Creating...',
-          success:function(data){        
-          Ext.Msg.alert('Sent', 'Trip sent. Thanks!', Ext.emptyFn);     
+          success:function(data){             
           },
           failure:function(form, result){
           }
       });
   }
 }**/
-								
+								//console.log(tripFormValues);
 								//tripFormValues=Ext.JSON.encode(tripFormValues);
-								
+								//console.log(tripFormValues);
 								//this.up('formpanel').submit();
                             }
                         }
@@ -228,8 +202,13 @@ Ext.application({
 				locationupdate: function(geo){
 					var gts = geo.getTimestamp();
 					if(!geoJson.properties.timeBegin) geoJson.properties.timeBegin=gts;
-					geoJson.coordinates.push([geo.getLongitude(),geo.getLatitude()]);
+					geoJson.coordinates.push([geo.getLatitude(),geo.getLongitude()]);
 					geoJson.properties.timeEnd = gts;
+					
+					//console.log('New latitude: ' + geo.getLatitude());
+					//console.log('New longitude: ' + geo.getLongitude());
+					
+					//console.log('Taken at: ' + gts.toString());
 					},//end locationupdate
 					locationerror: function(geo, bTimeout, bPermissionDenied, bLocationUnavailable, message) {
 						if(bTimeout){
@@ -266,6 +245,7 @@ Ext.create("Ext.tab.Panel", {
                         {
                             xtype: 'fieldset',
                             title: 'Start your Ride',
+                            //height: 285,
                             instructions: ''
                             ,
                             items: [
@@ -277,23 +257,29 @@ Ext.create("Ext.tab.Panel", {
 										change: function(field, newValue, oldValue) {
 											
 											if (newValue){
+												//console.log("GPS Enabled");
+												
 												audio.setLoop(true);
 												audio.play();										
-												geo.setAutoUpdate(true);
+												////geo.setAutoUpdate(true);
 											} else {
 												var confirmBox = Ext.Msg.confirm("Confirm", "End your Trip?", function(buttonId){
 													if (buttonId === 'yes'){
-
+														//console.log("GPS Disabled");
 														audio.setLoop(false);
 														audio.stop();
-														geo.setAutoUpdate(false);
+														//geo.setAutoUpdate(false);
 														
 														Ext.Viewport.down('tabpanel').setActiveItem(2);
 													} else {Ext.ComponentQuery.query('togglefield')[0].toggle();}
 													
-													});//end TripEnd Confirmation						
+													});
+												
+												
+												//console.log(geo.getAutoUpdate());
+											
 											}//end if
-
+											//console.log('Value of this toggle has changed:', (newValue) ? 'ON' : 'OFF');
 										}
 									}
                                     
